@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct YBIF_ShopApp: App {
+struct Test_SwiftUI_API_CallApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(selectedQuantity: [1:1])
         }
     }
 }
