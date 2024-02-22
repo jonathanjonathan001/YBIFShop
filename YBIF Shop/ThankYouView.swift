@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct ThankYouView: View {
+    
+    @Binding var name : String
+    
     var body: some View {
-        Text("Thank you for your purchase!")
+        Text("Thank you \(name) for your purchase!")
     }
 }
 
 #Preview {
-    ThankYouView()
+    ThankYouView(name: .constant(""))
 }

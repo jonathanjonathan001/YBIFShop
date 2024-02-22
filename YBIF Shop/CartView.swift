@@ -15,7 +15,7 @@ struct CartView: View {
     @Binding var itemsBought : Int
     @Binding var boughtQuantityByProduct : [ Int : Int]
     @State var totalPrice : Int = 0
-    
+    @State var name : String = ""
     
     var body: some View {
         VStack {
@@ -77,12 +77,14 @@ struct CartView: View {
                 
             }
             
-            
+            Text("Enter your details:").font(.title)
+            Text("Name:")
+            TextField("", text: $name).textFieldStyle(.roundedBorder).frame(width: 200)
             
             Text("Total price: \(totalPrice) SEK").fontWeight(.bold).font(.largeTitle)
             // outside of list
             if basketContains() && boughtQuantityByProduct.count != 0 {
-                NavigationLink(destination: { ThankYouView() }, label: {Text("BUY PRODUCTS")}).simultaneousGesture(TapGesture().onEnded {
+                NavigationLink(destination: { ThankYouView(name: $name) }, label: {Text("BUY PRODUCTS")}).simultaneousGesture(TapGesture().onEnded {
                     print(boughtQuantityByProduct)
                     if let allProducts {
                         for (productID, quantity) in boughtQuantityByProduct {
