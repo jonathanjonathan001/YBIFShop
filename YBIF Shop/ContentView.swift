@@ -173,7 +173,8 @@ struct ContentView: View {
                                                 }
                                                 
                                                 
-                                            } else {
+                                            }
+                                            else {
                                                 if selectedQuantity[product.productID]! <= product.stock {
                                                     
                                                     itemsBought += selectedQuantity[product.productID]!

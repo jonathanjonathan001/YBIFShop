@@ -7,7 +7,26 @@
 
 import SwiftUI
 
+struct OrderInput: Encodable {
+    let customerId : Int
+    let customerName: String
+    let totalPrice: Int
+    let purchaseDate: String
+    
+}
 
+struct OrderResult: Codable, Identifiable {
+    var id : UUID = UUID()
+    let orderId : Int
+    
+    enum CodingKeys : String, CodingKey {
+        case orderId = "id"
+    }
+    
+    init(orderId: Int) {
+        self.orderId = orderId
+    }
+}
 
 struct CartView: View {
     
@@ -57,7 +76,7 @@ struct CartView: View {
                                                     
                                                     totalPrice -=
                                                        product.price * boughtQuantityByProduct[product.productID]!
-                                                    
+              
                                                     itemsBought -= boughtQuantityByProduct[product.productID]!
                                                     boughtQuantityByProduct[product.productID] = 0
                                                     
@@ -85,8 +104,47 @@ struct CartView: View {
             // outside of list
             if basketContains() && boughtQuantityByProduct.count != 0 {
                 NavigationLink(destination: { ThankYouView(name: $name) }, label: {Text("BUY PRODUCTS")}).simultaneousGesture(TapGesture().onEnded {
+                    let totalSavedPrice : Int = totalPrice
                     print(boughtQuantityByProduct)
                     if let allProducts {
+                        var orderResultUse : OrderResult? = nil
+                        
+                        
+                        
+                        do { try registerOrder(boughtQuantityByProduct: boughtQuantityByProduct, totalPrice: totalSavedPrice, name: name, completion: {(success, orderResult) -> Void in
+                            if success {
+                                if let orderResult {
+                                    orderResultUse = orderResult
+                                }
+                            }
+                            
+                        }) }
+                        catch {
+                            print("Something went wrong")
+                        }
+                            
+                        var counter : Int = 0
+                        while true {
+                            counter += 1
+                            if counter == 5 {
+                                break
+                            }
+                            
+                            if let orderResultUse {
+                                print("ORDERRESULTUSE: \(orderResultUse)")
+                                print("BREAKING SLEEP LOOP")
+                                break
+                            } else {
+                                print("ORDER RESULT USE IS NIL")
+                                sleep(2)
+                            }
+                        }
+                        
+                        
+                        
+                        
+                        
+                        
                         for (productID, quantity) in boughtQuantityByProduct {
                             let theProduct = allProducts.filter {$0.productID == productID }.first
                             if let theProduct {
@@ -137,6 +195,51 @@ struct CartView: View {
         }
         print("boolean: \(boolean)")
         return boolean
+    }
+    
+    func registerOrder(boughtQuantityByProduct: [Int : Int], totalPrice: Int, name: String, completion: @escaping (_ success: Bool, _ orderResult: OrderResult?) -> Void) throws {
+        
+        let customerId: Int = 1
+        let customerName: String = name
+        let dateAndTime = Date()
+        let purchaseDate = dateAndTime.description
+        let orderInput : OrderInput = OrderInput(customerId: customerId, customerName: customerName, totalPrice: totalPrice, purchaseDate: purchaseDate)
+        
+        let url = URL(string:"http://localhost:8080/orders")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let theData = try! JSONEncoder().encode(orderInput)
+        
+        request.httpBody = theData
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        
+        
+        let task1 = URLSession.shared.dataTask(with: request, completionHandler: { (data, response,  error) -> Void in
+            let statusCode = (response as! HTTPURLResponse).statusCode
+            if statusCode == 200 {
+                print("Success inside POST order")
+                if let data {
+                    let result : OrderResult = try! JSONDecoder().decode(OrderResult.self, from: data)
+                    print(result)
+                    print("Order successfully stored")
+                    completion(true, result)
+                    
+                }
+            } else {
+                completion(false, nil)
+                print("Failure inside POST order")
+            }
+        
+            
+        })
+        
+        task1.resume()
+        
+        
+        
+        
     }
     
     func buyProduct(productID: Int, stock: Int, amount: Int) async throws {
