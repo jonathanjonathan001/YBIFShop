@@ -15,6 +15,10 @@ struct OrderInput: Encodable {
     
 }
 
+struct OrderProductInput: Encodable {
+    let amount: Int
+}
+
 struct OrderResult: Codable, Identifiable {
     var id : UUID = UUID()
     let orderId : Int
@@ -140,7 +144,13 @@ struct CartView: View {
                             }
                         }
                         
-                        
+                        for (productID, quantity) in boughtQuantityByProduct {
+                            Task {
+                                if let orderResultUse {
+                                    try await addProductToOrder(orderResult: orderResultUse, productID: productID, quantity: quantity)
+                                }
+                            }
+                        }
                         
                         
                         
@@ -195,6 +205,31 @@ struct CartView: View {
         }
         print("boolean: \(boolean)")
         return boolean
+    }
+    
+    func addProductToOrder(orderResult: OrderResult, productID: Int, quantity: Int) async throws {
+        
+        let productInput : OrderProductInput = OrderProductInput(amount: quantity)
+        
+        let url = URL(string:"http://localhost:8080/orderlines/\(orderResult.orderId)/\(productID)")!
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let theData = try! JSONEncoder().encode(productInput)
+        
+        request.httpBody = theData
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            let statusCode = (response as! HTTPURLResponse).statusCode
+            if statusCode == 200 {
+                print("Success --- POST product to order")
+            } else {
+                print("Failure --- POST product to order")
+            }
+        }
+        task.resume()
     }
     
     func registerOrder(boughtQuantityByProduct: [Int : Int], totalPrice: Int, name: String, completion: @escaping (_ success: Bool, _ orderResult: OrderResult?) -> Void) throws {
