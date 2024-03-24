@@ -247,7 +247,7 @@ struct ContentView: View {
 
     func performAPICallAllProducts() async throws -> [Product] {
         print("performAPICallAllProducts")
-        let url = URL(string: "http://localhost:8080/products")
+        let url = URL(string: "https://ec2.ybifshop.ovh/products")
 
         let (data, _) = try await URLSession.shared.data(from: url!)
 

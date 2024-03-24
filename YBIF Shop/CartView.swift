@@ -211,7 +211,7 @@ struct CartView: View {
         
         let productInput : OrderProductInput = OrderProductInput(amount: quantity)
         
-        let url = URL(string:"http://localhost:8080/orderlines/\(orderResult.orderId)/\(productID)")!
+        let url = URL(string:"https://ec2.ybifshop.ovh/orderlines/\(orderResult.orderId)/\(productID)")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -240,7 +240,7 @@ struct CartView: View {
         let purchaseDate = dateAndTime.description
         let orderInput : OrderInput = OrderInput(customerId: customerId, customerName: customerName, totalPrice: totalPrice, purchaseDate: purchaseDate)
         
-        let url = URL(string:"http://localhost:8080/orders")!
+        let url = URL(string:"https://ec2.ybifshop.ovh/orders")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -278,7 +278,7 @@ struct CartView: View {
     }
     
     func buyProduct(productID: Int, stock: Int, amount: Int) async throws {
-        let url = URL(string:"http://localhost:8080/product/\(productID)")!
+        let url = URL(string:"https://ec2.ybifshop.ovh/product/\(productID)")!
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         let changeProduct: ChangeProduct = ChangeProduct(stock: (stock - amount))
